@@ -30,8 +30,9 @@ $router->get('/durry/{durrynum}',function($durries){
    "<p>You've got {$durries} durries.</p>" ;
 });
 
-$router->get('/bigdawg/{name}',function($name){
+$router->get('/bigdawg/{name}/yes',function($name){
+  $capitalised = ucwords($name);
   return <<<HTML
-  <h1>Gidday {$name}, you're a BIG DAWG</h1>
+  <h1>Gidday {$capitalised}, you're a BIG DAWG</h1>
 HTML;
 });

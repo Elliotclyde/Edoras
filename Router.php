@@ -6,6 +6,8 @@ class Router
 
     private $supportedHttpMethods = array("GET", "POST");
 
+  
+
     public function __construct(IRequest $request)
     {
         $this->request = $request;
@@ -13,68 +15,39 @@ class Router
 
     public function __call($name, $arguments)
     {
-        if (preg_match('/{|}/', $arguments[0])) {
-            $this->createParameterRoute($name, $arguments);
-        }
         if ($name === "view") {
             $this->createViewRoute($arguments);
             return;
         }
-
+        if (!in_array(strtoupper($name), $this->supportedHttpMethods)) {
+            $this->invalidMethodHandler();
+        }
+        if (preg_match('/{|}/', $arguments[0])) {
+            $this->createParameterRoute($name, $arguments);
+        }
         $this->createClosureRoute($name, $arguments);
 
     }
     private function createParameterRoute($name, $arguments)
     {
-        list($route, $method) = $arguments;
-        $currentRoute = $this->formatRoute($this->request->requestUri);
-
-        if (!in_array(strtoupper($name), $this->supportedHttpMethods)) {
-            $this->invalidMethodHandler();
+        $parameterRoute = new ParameterRoute($name, $arguments);
+        
+        if(!property_exists($this,'parameterRoutes')){
+            $this->parameterRoutes=new stdClass();
         }
-       
-        if(! array_key_exists("parameterRoutes",$this->{strtolower($name)})){
-            $this->{strtolower($name)}["parameterRoutes"] = [];
+        if(!property_exists($this->parameterRoutes,strtolower($name))){
+            $this->parameterRoutes->{strtolower($name)}=[];
         }
-        array_push($this->{strtolower($name)}["parameterRoutes"],[$this->formatRoute($route) => $method]);
-     
+        
+        array_push($this->parameterRoutes->{strtolower($name)},$parameterRoute);
+    
     }
 
-    private function checkForParameterRoute($currentRoute, $parameterRoute)
-    {
-        return (startsWith($currentRoute, $this->getParameterRouteStart($parameterRoute)) && (endsWith($currentRoute, $this->getParameterRouteEnd($parameterRoute))));
-    }
-
-    private function getParameterRouteStart($route)
-    {
-        return preg_replace('/{.*/', '', $route);
-    }
-    private function getParameterRouteEnd($route)
-    {
-        return preg_replace('/([^-]*)}/', '', $route);
-    }
-    private function getParameterRouteParameterName($route)
-    {
-        $matches = [];
-        preg_match('/(?<={)(.*)(?=})/', $route, $matches);
-        return $matches[0];
-    }
-    private function getParameterValue($currentRoute, $matchedRoute)
-    {
-        $result = $currentRoute;
-        $result = str_replace($this->getParameterRouteStart($matchedRoute), '', $result);
-        $result = str_replace($this->getParameterRouteEnd($matchedRoute), '', $result);
-
-        return $result;
-    }
 
     private function createClosureRoute($name, $arguments)
     {
         list($route, $method) = $arguments;
 
-        if (!in_array(strtoupper($name), $this->supportedHttpMethods)) {
-            $this->invalidMethodHandler();
-        }
         $this->{strtolower($name)}[$this->formatRoute($route)] = $method;
     }
 
@@ -153,27 +126,17 @@ class Router
         header("{$this->request->serverProtocol} 404 Not Found");
     }
 
-    private function getParameterRouteMethod($method, $route)
+    private function getParameterRoute($httpMethod, $route)
     {
-        $parameterRoutes = $this->$method["parameterRoutes"];
+        $parameterRoutes = $this->parameterRoutes->$httpMethod;
         foreach ($parameterRoutes as $current) {
-            if ($this->checkForParameterRoute($route, array_keys($current)[0])) {
-                return $current[array_keys($current)[0]];
+            if ($current->matches($route)){
+                return $current;
             }
         }
         return false;
     }
-    private function getParameterRouteParameter($httpMethod, $route)
-    {
-        $parameterRoutes = $this->$httpMethod["parameterRoutes"];
-        foreach ($parameterRoutes as $current) {
-            if ($this->checkForParameterRoute($route, array_keys($current)[0])) {
-                return [$this->getParameterRouteParameterName(array_keys($current)[0])=>$this->getParameterValue($route,array_keys($current)[0])];
-            }
-        }
-        return false;
-    }
-
+   
 
     public function resolve()
     {
@@ -183,10 +146,12 @@ class Router
         $methodDictionary = $this->$httpMethod;
         $formatedRoute = $this->formatRoute($this->request->requestUri);
         $parameters=[];
+
         if (!in_array($formatedRoute, array_keys($methodDictionary))) {
-            if ($this->getParameterRouteMethod($httpMethod, $formatedRoute)) {
-                $method = $this->getParameterRouteMethod($httpMethod, $formatedRoute);
-                $parameters= $this->getParameterRouteParameter($httpMethod, $formatedRoute);
+                $parameterRoute=$this->getParameterRoute($httpMethod, $formatedRoute);
+            if ($parameterRoute) {
+                $method = $parameterRoute->method;
+                $parameters= $parameterRoute->getParameter($formatedRoute);
             } else {
                 $this->defaultRequestHandler();
                 return;
@@ -205,8 +170,6 @@ class Router
 
 }
 
-
-
 function startsWith($haystack, $needle)
 {
     $length = strlen($needle);
@@ -222,10 +185,43 @@ function endsWith($haystack, $needle)
     return substr($haystack, -$length) === $needle;
 }
 
+
+
 class ParameterRoute
 {
-    public function __construct()
+    public function __construct($name,$arguments)
     {
-
+        $this->name=$name;
+        $this->route =$arguments[0];
+        $this->method =$arguments[1];
+        $this->parameterName = $this->getParameterName($this->route);
+    }
+    private function getParameterName($route)
+    {
+        $matches = [];
+        preg_match('/(?<={)(.*)(?=})/', $route, $matches);
+        return $matches[0];
+    }
+    private function getParameterValue($route)
+    {
+        $result = $route;
+        $result = str_replace($this->getStart(), '', $result);
+        $result = str_replace($this->geteEnd(), '', $result);
+        return $result;
+    }
+    public function matches($route)
+    {
+        return (startsWith($route, $this->getStart()) && (endsWith($route, $this->geteEnd())));
+    }
+    public function getParameter($route){
+        return [$this->parameterName => $this->getParameterValue($route)];
+    }
+    private function getStart()
+    {
+        return preg_replace('/{.*/', '', $this->route);
+    }
+    private function geteEnd()
+    {
+        return preg_replace('/([^-]*)}/', '', $this->route);
     }
 }
