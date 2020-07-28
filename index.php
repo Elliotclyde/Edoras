@@ -1,7 +1,7 @@
 <?php
 
 include_once 'Request.php';
-include_once 'Router.php';
+include_once 'Router/Router.php';
 
 $router = new Router(new Request);
 

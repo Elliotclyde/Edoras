@@ -1,12 +1,13 @@
 <?php
 
+include_once "ParameterRoute.php";
+include_once "ViewRoute.php";
+
 class Router
 {
     private $request;
 
-    private $supportedHttpMethods = array("GET", "POST");
-
-  
+    private $supportedHttpMethods = array("GET", "POST");  
 
     public function __construct(IRequest $request)
     {
@@ -22,91 +23,49 @@ class Router
         if (!in_array(strtoupper($name), $this->supportedHttpMethods)) {
             $this->invalidMethodHandler();
         }
-        if (preg_match('/{|}/', $arguments[0])) {
+        if (preg_match('/{[a-zA-Z0-9]+}/', $arguments[0])) {
             $this->createParameterRoute($name, $arguments);
         }
         $this->createClosureRoute($name, $arguments);
 
     }
+
+    private function createClosureRoute($name, $arguments)
+    {
+        list($route, $method) = $arguments;
+        $this->{strtolower($name)}[$this->formatRoute($route)] = $method;
+    }
+
     private function createParameterRoute($name, $arguments)
     {
         $parameterRoute = new ParameterRoute($name, $arguments);
+        $this->generateParameterRouteProperty($name);
         
+        array_push($this->parameterRoutes->{strtolower($name)},$parameterRoute);
+    }
+
+    private function generateParameterRouteProperty($name){
         if(!property_exists($this,'parameterRoutes')){
             $this->parameterRoutes=new stdClass();
         }
         if(!property_exists($this->parameterRoutes,strtolower($name))){
             $this->parameterRoutes->{strtolower($name)}=[];
         }
-        
-        array_push($this->parameterRoutes->{strtolower($name)},$parameterRoute);
-    
     }
 
-
-    private function createClosureRoute($name, $arguments)
-    {
-        list($route, $method) = $arguments;
-
-        $this->{strtolower($name)}[$this->formatRoute($route)] = $method;
-    }
 
     private function createViewRoute($arguments)
     {
-        list($route, $viewName, $variables) = array_pad($arguments, 3, []);
-        $viewContents = $this->getViewContents($viewName, $variables);
+        $viewRoute = new ViewRoute($arguments);
+        
+        $viewContents = $viewRoute->getViewContents();
 
-        $this->{'get'}[$this->formatRoute($route)] =
+        $this->{'get'}[$this->formatRoute($viewRoute->route)] =
         function () use ($viewContents) {
             return $viewContents;
         };
     }
 
-    private function getViewContents($viewName, $variables = array())
-    {
-        $ViewFilePathMatches = $this->getMatchingViewFiles($viewName);
-
-        if (count($ViewFilePathMatches) === 0) {
-            throw new Exception('no matching view filenames in views directory for ' . $viewName);
-        }
-
-        $filePath = "./views/" . reset($ViewFilePathMatches);
-        $fileType = explode('.', reset($ViewFilePathMatches))[1];
-
-        // if php return php output
-        if ($fileType == 'php') {
-            return $this->getPHPViewOutput($filePath, $variables);
-        }
-
-        // if non php file return
-        return (file_get_contents($filePath));
-    }
-
-    private function getMatchingViewFiles($viewName)
-    {
-        return array_filter(
-            scandir('./views'),
-            function ($filePath) use ($viewName) {
-                return (explode('.', $filePath)[0] === $viewName);
-            });
-    }
-
-    private function getPHPViewOutput($filePath, $variables)
-    {
-        $output = null;
-        if (file_exists($filePath)) {
-            extract($variables);
-            ob_start();
-            include $filePath;
-            $output = ob_get_clean();
-        }
-        return $output;
-    }
-
-    /**
-     * Removes trailing forward slashes from the right of the route.
-     * @param route (string)
-     */
     private function formatRoute($route)
     {
         $result = rtrim($route, '/');
@@ -142,6 +101,7 @@ class Router
     {
         // method dictionary - keys are the urls, values are method to call.
         // It is fetched by grabbing an index
+
         $httpMethod = strtolower($this->request->requestMethod);
         $methodDictionary = $this->$httpMethod;
         $formatedRoute = $this->formatRoute($this->request->requestUri);
@@ -185,43 +145,3 @@ function endsWith($haystack, $needle)
     return substr($haystack, -$length) === $needle;
 }
 
-
-
-class ParameterRoute
-{
-    public function __construct($name,$arguments)
-    {
-        $this->name=$name;
-        $this->route =$arguments[0];
-        $this->method =$arguments[1];
-        $this->parameterName = $this->getParameterName($this->route);
-    }
-    private function getParameterName($route)
-    {
-        $matches = [];
-        preg_match('/(?<={)(.*)(?=})/', $route, $matches);
-        return $matches[0];
-    }
-    private function getParameterValue($route)
-    {
-        $result = $route;
-        $result = str_replace($this->getStart(), '', $result);
-        $result = str_replace($this->geteEnd(), '', $result);
-        return $result;
-    }
-    public function matches($route)
-    {
-        return (startsWith($route, $this->getStart()) && (endsWith($route, $this->geteEnd())));
-    }
-    public function getParameter($route){
-        return [$this->parameterName => $this->getParameterValue($route)];
-    }
-    private function getStart()
-    {
-        return preg_replace('/{.*/', '', $this->route);
-    }
-    private function geteEnd()
-    {
-        return preg_replace('/([^-]*)}/', '', $this->route);
-    }
-}
