@@ -9,7 +9,6 @@ class ViewRoute
         list($this->route, $this->viewName, $this->variables) = array_pad($arguments, 3, []);
         $this->filePath = $this->getFilePath();
         $this->fileType = $this->getFileType();
-        echo(json_encode($this->fileType));
     }
 
     public function getViewContents()
