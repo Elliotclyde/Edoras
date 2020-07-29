@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 class ViewRouteTest extends TestCase
 {
-    public function testCanBeCreatedFromValidEmailAddress()
+    public function testCanBeCreatedWithParameters()
     {
         $this->assertInstanceOf(
             ViewRoute::class,
