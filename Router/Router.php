@@ -30,11 +30,15 @@ class Router
 
     }
 
+    //closure route
+
     private function createClosureRoute($name, $arguments)
     {
         list($route, $method) = $arguments;
         $this->{strtolower($name)}[$this->formatRoute($route)] = $method;
     }
+
+    //parameter route
 
     private function createParameterRoute($name, $arguments)
     {
@@ -53,6 +57,7 @@ class Router
         }
     }
 
+      //view route
 
     private function createViewRoute($arguments)
     {
@@ -106,6 +111,8 @@ class Router
         $methodDictionary = $this->$httpMethod;
         $formatedRoute = $this->formatRoute($this->request->requestUri);
         $parameters=[];
+
+        //refactor this section
 
         if (!in_array($formatedRoute, array_keys($methodDictionary))) {
                 $parameterRoute=$this->getParameterRoute($httpMethod, $formatedRoute);
