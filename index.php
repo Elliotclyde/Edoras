@@ -1,5 +1,6 @@
 <?php
 
+require __DIR__ . '/vendor/autoload.php';
 include_once 'Request.php';
 include_once 'Router/Router.php';
 

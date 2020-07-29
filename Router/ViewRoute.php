@@ -2,7 +2,7 @@
 
 class ViewRoute
 {
-    private $VIEWS_DIR = "./views/";
+    private $VIEWS_DIR = "./Views/";
 
     public function __construct($arguments)
     {
@@ -38,7 +38,7 @@ class ViewRoute
     private function getMatchingViewFiles($viewName)
     {
         return array_filter(
-            scandir('./views'),
+            scandir($this->VIEWS_DIR),
             function ($filePath) use ($viewName) {
                 return (explode('.', $filePath)[0] === $viewName);
             });
