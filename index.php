@@ -3,6 +3,7 @@
 require __DIR__ . '/vendor/autoload.php';
 include_once 'Request.php';
 include_once 'Router/Router.php';
+include_once 'View/View.php';
 
 $router = new Router(new Request($_SERVER));
 
@@ -22,6 +23,10 @@ HTML;
 $router->view('/profile', "profile",["title"=>"Yo yo yo"]);
 
 $router->view('/liz','person',['person'=>'Elizabeth','catchphrase'=>'Cowabunga dude']);
+
+$router->get('/hugh',function (){
+    return (new View('person',['person'=>'Hugh','catchphrase'=>'I am a person']))->make();
+});
 
 $router->view('/eve','person',['person'=>'Eve','catchphrase'=>'I got married and it was so fun!']);
 

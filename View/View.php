@@ -3,7 +3,7 @@
 class View
 {
 
-    private $VIEWS_DIR = "./Views/";
+    private $VIEWS_DIR = ".\\www\\php-router\\Views\\";
 
     private $fileType;
     private $filePath;
@@ -50,6 +50,7 @@ class View
 
     private function getMatchingViewFiles($viewName)
     {
+        var_dump(phpinfo());
         return array_filter(
             scandir($this->VIEWS_DIR),
             function ($filePath) use ($viewName) {
