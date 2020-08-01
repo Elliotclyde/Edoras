@@ -4,7 +4,7 @@ require __DIR__ . '/vendor/autoload.php';
 include_once 'Request.php';
 include_once 'Router/Router.php';
 
-$router = new Router(new Request);
+$router = new Router(new Request($_SERVER));
 
 $router->view('/', "home");
 

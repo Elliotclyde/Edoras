@@ -4,14 +4,15 @@ include_once 'IRequest.php';
 
 class Request implements IRequest
 {
-    public function __construct()
+    public function __construct($server)
     {
+        $this->server = $server;
         $this->bootstrapSelf();
     }
 
     private function bootstrapSelf()
     {
-        foreach ($_SERVER as $key => $value) {
+        foreach ($this->server as $key => $value) {
             $this->{$this->toCamelCase($key)} = $value;
         }
     }
