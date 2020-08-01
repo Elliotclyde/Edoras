@@ -2,7 +2,6 @@
 
 include_once "ParameterRoute.php";
 include_once "./View/View.php";
-include_once "ViewRoute.php";
 
 class Router
 {
@@ -62,13 +61,11 @@ class Router
 
     private function createViewRoute($arguments)
     {
-        $viewRoute = new ViewRoute($arguments);
+        list($viewRoute, $viewName, $viewArguments) = array_pad($arguments, 3, []);
         
-        $viewContents = $viewRoute->getViewContents();
-
-        $this->{'get'}[$this->formatRoute($viewRoute->route)] =
-        function () use ($viewContents) {
-            return $viewContents;
+        $this->{'get'}[$this->formatRoute($viewRoute)] =
+        function () use ($viewName,$viewArguments) {
+            return (new View($viewName,$viewArguments))->make();
         };
     }
 
