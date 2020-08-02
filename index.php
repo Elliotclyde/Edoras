@@ -39,3 +39,11 @@ $router->get('/bigdawg/{name}/yes',function($name){
   <h1>Gidday {$capitalised}, you're a BIG DAWG</h1>
 HTML;
 });
+
+$router->get('/posts/{post}',function($slug){
+  $post = (new Model('posts'))->selectWhere('slug',$slug);
+  if(count($post)==0){
+    header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
+  }
+  else return $post[0]->body;
+});
