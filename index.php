@@ -1,9 +1,12 @@
 <?php
 
 require __DIR__ . '/vendor/autoload.php';
+
 include_once 'Request.php';
 include_once 'Router/Router.php';
 include_once 'View/View.php';
+
+include_once 'initialise.php';
 
 $router = new Router(new Request($_SERVER));
 

@@ -3,14 +3,14 @@
 class View
 {
 
-    private $VIEWS_DIR = ".\\www\\php-router\\Views\\";
-
+    private $viewsDir;
     private $fileType;
     private $filePath;
     private $variables;
 
     public function __construct($viewName, $variables = [])
     {
+        $this->viewsDir= $_SERVER['DOCUMENT_ROOT'] . ".\\Views\\";
         $this->viewName = $viewName;
         $this->variables = $variables;
         $this->filePath = $this->getFilePath();
@@ -40,7 +40,7 @@ class View
         if (count($ViewFilePathMatches) === 0) {
             throw new Exception('no matching view filenames in views directory for ' . $this->viewName);
         }
-        return $this->VIEWS_DIR . reset($ViewFilePathMatches);
+        return $this->viewsDir . reset($ViewFilePathMatches);
     }
 
     private function getFileType()
@@ -50,9 +50,8 @@ class View
 
     private function getMatchingViewFiles($viewName)
     {
-        var_dump(phpinfo());
         return array_filter(
-            scandir($this->VIEWS_DIR),
+            scandir($this->viewsDir),
             function ($filePath) use ($viewName) {
                 return (explode('.', $filePath)[0] === $viewName);
             });
