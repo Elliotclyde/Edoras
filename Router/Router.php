@@ -1,7 +1,7 @@
 <?php
 
 include_once "ParameterRoute.php";
-include_once "./View/View.php";
+include_once "../View/View.php";
 
 class Router
 {

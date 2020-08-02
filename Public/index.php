@@ -1,6 +1,6 @@
 <?php
 
-include_once 'initialise.php';
+include_once '../initialise.php';
 
 $router = new Router(new Request($_SERVER));
 
@@ -45,5 +45,7 @@ $router->get('/posts/{post}',function($slug){
   if(count($post)==0){
     header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
   }
-  else return $post[0]->body;
+  else{
+    echo (new View('post',['title'=>$post[0]->title,'body'=>$post[0]->body]))->make();
+  } 
 });

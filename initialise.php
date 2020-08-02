@@ -1,5 +1,6 @@
 <?php
 
+
 // Set up env
 $envKeyValPairs = explode(PHP_EOL,file_get_contents(__DIR__ . '/.env'));
 foreach ($envKeyValPairs as $element){
