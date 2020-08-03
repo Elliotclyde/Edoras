@@ -1,7 +1,7 @@
 <?php
 
 include_once "ParameterRoute.php";
-include_once "../View/View.php";
+include_once __DIR__ ."/../View/View.php";
 
 class Router
 {
@@ -49,6 +49,7 @@ class Router
     }
 
     private function generateParameterRouteProperty($name){
+        
         if(!property_exists($this,'parameterRoutes')){
             $this->parameterRoutes=new stdClass();
         }
@@ -56,8 +57,7 @@ class Router
             $this->parameterRoutes->{strtolower($name)}=[];
         }
     }
-
-      //view route
+    //view route - always under get
 
     private function createViewRoute($arguments)
     {
@@ -102,8 +102,7 @@ class Router
 
     public function resolve()
     {
-        // method dictionary - keys are the urls, values are method to call.
-        // It is fetched by grabbing an index
+        // method dictionary - keys are the urls, values are method to call
 
         $httpMethod = strtolower($this->request->requestMethod);
         $methodDictionary = $this->$httpMethod;

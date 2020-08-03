@@ -31,9 +31,14 @@ class Model
     public function selectWhere($key, $value)
     {
       $this->checkForAlphaNumericAndDash($key);
-        $query = "SELECT * FROM {$this->tableName} WHERE {$key} ='{$value}'";
+      $query = "SELECT * FROM {$this->tableName} WHERE {$key} ='{$value}'";
         $result = $this->getquery($this->connection->query($query));
         return $result;
+    }
+
+    public function create($data)
+    {
+
     }
 
     public function updateWhere($update, $condition)
@@ -50,6 +55,15 @@ class Model
         $this->connection->query($query);
 
         return $this->selectWhere($conditionKey, $conditionValue);
+    }
+
+    public function getKeys(){
+        $query = "SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_NAME`='{$this->tableName}';";
+        $result = [];
+        foreach ($this->connection->query($query) as $row){
+            array_push($result,$row['COLUMN_NAME']);
+        }
+        return $result;
     }
 
     protected function getQuery($queriedData)

@@ -1,8 +1,9 @@
 <?php
 
 include_once '../initialise.php';
-
-$router = new Router(new Request($_SERVER));
+$request = new Request($_SERVER);
+$router = new Router($request);
+$requestVariables = $_REQUEST;
 
 $router->view('/', "home");
 
@@ -13,9 +14,8 @@ $router->post('/data', function ($request) {
 $router->get('/flora', function () {
     return <<<HTML
   <h1>purrrr ... purrr ... purrrr ... ZZZZZzzzzz</h1>
-HTML;
+HTML; 
 });
-
 
 $router->view('/profile', "profile",["title"=>"Yo yo yo"]);
 
@@ -48,4 +48,9 @@ $router->get('/posts/{post}',function($slug){
   else{
     echo (new View('post',['title'=>$post[0]->title,'body'=>$post[0]->body]))->make();
   } 
+});
+$router->post('/',function() use ($requestVariables){
+  return <<<HTML
+  <h1>Gidday {$requestVariables['textinput']}, you're a BIG DAWG</h1>
+HTML;
 });

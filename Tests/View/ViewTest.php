@@ -8,8 +8,9 @@ class ViewTest extends TestCase
 {
     public function testWillReturnHomeView()
     {
-        $this->assertIsString(
+         $this->assertIsString(
             (new View('home'))->make()
         );
+        
     }
 }

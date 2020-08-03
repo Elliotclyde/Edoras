@@ -14,9 +14,3 @@ include_once 'Router/Request.php';
 include_once 'Router/Router.php';
 include_once 'View/View.php';
 include_once 'Model/Model.php';
-
-
-
-
-
-

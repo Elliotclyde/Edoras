@@ -10,7 +10,7 @@ class View
 
     public function __construct($viewName, $variables = [])
     {
-        $this->viewsDir= $_SERVER['DOCUMENT_ROOT'] . "/../Views/";
+        $this->viewsDir= __DIR__ . "/../Views/";
         $this->viewName = $viewName;
         $this->variables = $variables;
         $this->filePath = $this->getFilePath();
@@ -45,7 +45,8 @@ class View
 
     private function getFileType()
     {
-        return explode('.', $this->filePath)[3];
+        $explodedFilePath = explode('.', $this->filePath); 
+        return $explodedFilePath[count($explodedFilePath)-1];
     }
 
     private function getMatchingViewFiles($viewName)
