@@ -33,6 +33,8 @@ class Auth
     }
     public function login ($username,$password)
     {
+
+        //Grabs username matches from DB
         $matches = (new Model('users'))->selectWhere('username', $username);
 
         if (count($matches) < 1) {
@@ -43,15 +45,14 @@ class Auth
         if (!password_verify($password, $user->password)){
             return false;
         }
-        foreach(array_keys((array)$user) as $key){
-            $_SESSION[$key]= $user->{$key};
-        }
+
         $_SESSION['isLoggedIn']=true;
         $_SESSION['id']=$user->id;
         $_SESSION['username']=$user->username;
-        
+
         $this->sessionData = $_SESSION;
         $this->bootstrapSelf();
+        return true;
     }
 
     public function logout()

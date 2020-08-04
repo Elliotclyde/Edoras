@@ -4,6 +4,20 @@ include_once __DIR__ . '/../Bootstrap.php';
 
 $router->view('/', "home");
 
+$router->post('/',function() use ($requestVariables,$auth){
+
+   if($auth->login($requestVariables['username'],$requestVariables['password'])){
+    return <<<HTML
+    <h1>Hi, {$requestVariables['username']}. You are now logged in</h1>
+  HTML;
+   }
+   else
+   {return <<<HTML
+    <h1>Sorry, you aren't logged in.</h1>
+  HTML;
+  }  
+});
+
 $router->post('/data', function ($request) {
     return json_encode($request->getBody());
 });
@@ -46,8 +60,4 @@ $router->get('/posts/{post}',function($slug){
     return (new View('post',['title'=>$post[0]->title,'body'=>$post[0]->body]))->make();
   } 
 });
-$router->post('/',function() use ($requestVariables){
-  return <<<HTML
-  <h1>Gidday {$requestVariables['textinput']}, you're a BIG DAWG</h1>
-HTML;
-});
+
