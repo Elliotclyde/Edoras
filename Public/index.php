@@ -1,9 +1,6 @@
 <?php
 
-include_once '../initialise.php';
-$request = new Request($_SERVER);
-$router = new Router($request);
-$requestVariables = $_REQUEST;
+include_once __DIR__ . '/../Bootstrap.php';
 
 $router->view('/', "home");
 
@@ -14,7 +11,7 @@ $router->post('/data', function ($request) {
 $router->get('/flora', function () {
     return <<<HTML
   <h1>purrrr ... purrr ... purrrr ... ZZZZZzzzzz</h1>
-HTML; 
+HTML;
 });
 
 $router->view('/profile', "profile",["title"=>"Yo yo yo"]);
@@ -46,7 +43,7 @@ $router->get('/posts/{post}',function($slug){
     header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
   }
   else{
-    echo (new View('post',['title'=>$post[0]->title,'body'=>$post[0]->body]))->make();
+    return (new View('post',['title'=>$post[0]->title,'body'=>$post[0]->body]))->make();
   } 
 });
 $router->post('/',function() use ($requestVariables){

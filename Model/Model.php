@@ -32,13 +32,8 @@ class Model
     {
       $this->checkForAlphaNumericAndDash($key);
       $query = "SELECT * FROM {$this->tableName} WHERE {$key} ='{$value}'";
-        $result = $this->getquery($this->connection->query($query));
+        $result = $this->getquery($this->connection->query($query,PDO::FETCH_ASSOC));
         return $result;
-    }
-
-    public function create($data)
-    {
-
     }
 
     public function updateWhere($update, $condition)
@@ -60,7 +55,7 @@ class Model
     public function getKeys(){
         $query = "SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_NAME`='{$this->tableName}';";
         $result = [];
-        foreach ($this->connection->query($query) as $row){
+        foreach ($this->connection->query($query,PDO::FETCH_ASSOC) as $row){
             array_push($result,$row['COLUMN_NAME']);
         }
         return $result;

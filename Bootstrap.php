@@ -1,5 +1,6 @@
 <?php
 
+session_start();
 
 // Set up env
 $envKeyValPairs = explode(PHP_EOL,file_get_contents(__DIR__ . '/.env'));
@@ -14,3 +15,11 @@ include_once 'Router/Request.php';
 include_once 'Router/Router.php';
 include_once 'View/View.php';
 include_once 'Model/Model.php';
+//include_once 'Auth/Auth.php';
+
+//set up main services
+
+$request = new Request($_SERVER);
+$router = new Router($request);
+$requestVariables = $_REQUEST;
+//$auth = new Auth($_SESSION);

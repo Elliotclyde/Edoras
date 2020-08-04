@@ -6,6 +6,7 @@ include_once __DIR__ ."/../View/View.php";
 class Router
 {
     private $request;
+    private $called = false;
 
     private $supportedHttpMethods = array("GET", "POST");  
 
@@ -16,6 +17,7 @@ class Router
 
     public function __call($name, $arguments)
     {
+        $this->called=true;
         if ($name === "view") {
             $this->createViewRoute($arguments);
             return;
@@ -129,7 +131,9 @@ class Router
 
     public function __destruct()
     {
+        if($this->called){
         $this->resolve();
+        }
     }
 
 }
