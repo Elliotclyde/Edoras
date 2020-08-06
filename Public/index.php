@@ -3,23 +3,87 @@
 include_once __DIR__ . '/../Bootstrap.php';
 
 $router->view('/', "home");
+$router->view('/backend', 'backend');
 
-$router->post('/',function() use ($requestVariables,$auth){
+$router->post('/backend', function () use ($requestVariables, $auth) {
 
-   if($auth->login($requestVariables['username'],$requestVariables['password'])){
-    return <<<HTML
-    <h1>Hi, {$requestVariables['username']}. You are now logged in</h1>
-  HTML;
-   }
-   else
-   {return <<<HTML
+    if ($auth->login($requestVariables['username'], $requestVariables['password'])) {
+        header("Location: {$_SERVER["HTTP_ORIGIN"]}/backend/posts/");
+    } else {return <<<HTML
     <h1>Sorry, you aren't logged in.</h1>
   HTML;
-  }  
+    }
 });
 
+$router->get('/backend/posts', function () use ($auth) {
+
+    if (!$auth->check()) {
+        header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
+    } else {
+        $posts = (new Model('posts'))->selectAll();
+        $postList = '';
+        foreach ($posts as $post) {
+            $postList .= '<div class="post">
+                          <h2><a href="/backend/posts/edit/'.$post->id.'">' . $post->title . '</a></h2>
+                          <div class="content">' . $post->body . '</div>
+                          </div>';
+        }
+        return (new View('backendpostlist', ['postList' => $postList]))->make();
+    }
+});
+
+$router->get('/backend/posts/edit/{postid}', function ($postId) use ($auth) {
+  if (!$auth->check()) {
+      header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
+  } else {
+
+    $posts = (new Model('posts'))->selectWhere('id', $postId);
+    if (count($posts) == 0) {
+        header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
+    } else {
+        $currentPost = $posts[0];
+        return (new View('backendpostupdate', (array)$currentPost))->make();
+    }
+  }
+});
+
+$router->post('/backend/posts/edit/{postid}', function ($postId) use ($auth, $requestVariables) {
+  $posts = new Model('posts');
+  if (!$auth->check() || !$posts->selectWhere('id',$postId) ) {
+      header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
+  } else {
+
+    foreach ($requestVariables as $key => $value){
+      $posts->updateWhere([$key => $value],['id'=> $postId]);
+    }
+    header("Location: {$_SERVER["HTTP_ORIGIN"]}/backend/posts/edit/{$postId}");
+  }
+});
+
+
+$router->get('/backend/posts/new', function () use ($auth) {
+  if (!$auth->check()) {
+      header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
+  } else {
+    return (new View('backendpostnew'))->make(); 
+  }
+});
+
+$router->post('/backend/posts/new', function () use ($auth, $requestVariables) {
+  
+  if (!$auth->check()) {
+      header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
+  } else {
+    $posts = new Model('posts');
+    $id = $posts->new($requestVariables)[0];
+    header("Location: {$_SERVER["HTTP_ORIGIN"]}/backend/posts/edit/{$id}");
+  }
+});
+
+
+
 $router->post('/data', function ($request) {
-    return json_encode($request->getBody());
+    return json_encode($request);
 });
 
 $router->get('/flora', function () {
@@ -28,36 +92,35 @@ $router->get('/flora', function () {
 HTML;
 });
 
-$router->view('/profile', "profile",["title"=>"Yo yo yo"]);
+$router->view('/profile', "profile", ["title" => "Yo yo yo"]);
 
-$router->view('/liz','person',['person'=>'Elizabeth','catchphrase'=>'Cowabunga dude']);
+$router->view('/liz', 'person', ['person' => 'Elizabeth', 'catchphrase' => 'Cowabunga dude']);
 
-$router->get('/hugh',function (){
-    return (new View('person',['person'=>'Hugh','catchphrase'=>'I am a person']))->make();
+$router->get('/hugh', function () {
+    return (new View('person', ['person' => 'Hugh', 'catchphrase' => 'I am a person']))->make();
 });
 
-$router->view('/eve','person',['person'=>'Eve','catchphrase'=>'I got married and it was so fun!']);
+$router->view('/eve', 'person', ['person' => 'Eve', 'catchphrase' => 'I got married and it was so fun!']);
 
-$router->get('/durry/{durrynum}',function($durries){
-   return
-  "<h1>Durries mate</h1>" .
-   "<p>You've got {$durries} durries.</p>" ;
+$router->get('/durry/{durrynum}', function ($durries) {
+    return
+        "<h1>Durries mate</h1>" .
+        "<p>You've got {$durries} durries.</p>";
 });
 
-$router->get('/bigdawg/{name}/yes',function($name){
-  $capitalised = ucwords($name);
-  return <<<HTML
+$router->get('/bigdawg/{name}/yes', function ($name) {
+    $capitalised = ucwords($name);
+    return <<<HTML
   <h1>Gidday {$capitalised}, you're a BIG DAWG</h1>
 HTML;
 });
 
-$router->get('/posts/{post}',function($slug){
-  $post = (new Model('posts'))->selectWhere('slug',$slug);
-  if(count($post)==0){
-    header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
-  }
-  else{
-    return (new View('post',['title'=>$post[0]->title,'body'=>$post[0]->body]))->make();
-  } 
+$router->get('/posts/{post}', function ($slug) {
+    $posts = (new Model('posts'))->selectWhere('slug', $slug);
+    if (count($posts) == 0) {
+        header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
+    } else {
+        $currentPost = $posts[0];
+        return (new View('post', ['title' => $currentPost->title, 'body' => $currentPost->body]))->make();
+    }
 });
-

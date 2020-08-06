@@ -1,14 +1,14 @@
 <?php
 
 include_once "ParameterRoute.php";
-include_once __DIR__ ."/../View/View.php";
+include_once __DIR__ . "/../View/View.php";
 
 class Router
 {
     private $request;
     private $called = false;
 
-    private $supportedHttpMethods = array("GET", "POST");  
+    private $supportedHttpMethods = array("GET", "POST");
 
     public function __construct(IRequest $request)
     {
@@ -17,7 +17,7 @@ class Router
 
     public function __call($name, $arguments)
     {
-        $this->called=true;
+        $this->called = true;
         if ($name === "view") {
             $this->createViewRoute($arguments);
             return;
@@ -46,17 +46,18 @@ class Router
     {
         $parameterRoute = new ParameterRoute($name, $arguments);
         $this->generateParameterRouteProperty($name);
-        
-        array_push($this->parameterRoutes->{strtolower($name)},$parameterRoute);
+
+        array_push($this->parameterRoutes->{strtolower($name)}, $parameterRoute);
     }
 
-    private function generateParameterRouteProperty($name){
-        
-        if(!property_exists($this,'parameterRoutes')){
-            $this->parameterRoutes=new stdClass();
+    private function generateParameterRouteProperty($name)
+    {
+
+        if (!property_exists($this, 'parameterRoutes')) {
+            $this->parameterRoutes = new stdClass();
         }
-        if(!property_exists($this->parameterRoutes,strtolower($name))){
-            $this->parameterRoutes->{strtolower($name)}=[];
+        if (!property_exists($this->parameterRoutes, strtolower($name))) {
+            $this->parameterRoutes->{strtolower($name)} = [];
         }
     }
     //view route - always under get
@@ -64,10 +65,10 @@ class Router
     private function createViewRoute($arguments)
     {
         list($viewRoute, $viewName, $viewArguments) = array_pad($arguments, 3, []);
-        
+
         $this->{'get'}[$this->formatRoute($viewRoute)] =
-        function () use ($viewName,$viewArguments) {
-            return (new View($viewName,$viewArguments))->make();
+        function () use ($viewName, $viewArguments) {
+            return (new View($viewName, $viewArguments))->make();
         };
     }
 
@@ -91,16 +92,20 @@ class Router
     }
 
     private function getParameterRoute($httpMethod, $route)
-    {
-        $parameterRoutes = $this->parameterRoutes->$httpMethod;
-        foreach ($parameterRoutes as $current) {
-            if ($current->matches($route)){
-                return $current;
+     {
+        
+         if (!property_exists($this->parameterRoutes,$httpMethod)) {
+             return false;
+         } else {
+            $parameterRoutes = $this->parameterRoutes->$httpMethod;
+            foreach ($parameterRoutes as $current) {
+                if ($current->matches($route)) {
+                    return $current;
+                }
             }
+            return false;
         }
-        return false;
     }
-   
 
     public function resolve()
     {
@@ -109,15 +114,15 @@ class Router
         $httpMethod = strtolower($this->request->requestMethod);
         $methodDictionary = $this->$httpMethod;
         $formatedRoute = $this->formatRoute($this->request->requestUri);
-        $parameters=[];
-
+        $parameters = [];
+        
         //refactor this section
 
         if (!in_array($formatedRoute, array_keys($methodDictionary))) {
-                $parameterRoute=$this->getParameterRoute($httpMethod, $formatedRoute);
+            $parameterRoute = $this->getParameterRoute($httpMethod, $formatedRoute);
             if ($parameterRoute) {
                 $method = $parameterRoute->method;
-                $parameters= $parameterRoute->getParameter($formatedRoute);
+                $parameters = $parameterRoute->getParameter($formatedRoute);
             } else {
                 $this->defaultRequestHandler();
                 return;
@@ -125,14 +130,14 @@ class Router
         } else {
             $method = $methodDictionary[$formatedRoute];
         }
-
+        
         echo call_user_func_array($method, $parameters);
     }
 
     public function __destruct()
     {
-        if($this->called){
-        $this->resolve();
+        if ($this->called) {
+            $this->resolve();
         }
     }
 
@@ -152,4 +157,3 @@ function endsWith($haystack, $needle)
     }
     return substr($haystack, -$length) === $needle;
 }
-

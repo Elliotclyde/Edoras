@@ -1,6 +1,6 @@
 <?php
 
-//call
+// This creates a new user. The first variable is the username. The second variable is the password.
 
 include_once __DIR__ ."/../Bootstrap.php";
 include_once __DIR__ ."/../Model/Model.php";

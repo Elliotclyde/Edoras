@@ -25,13 +25,24 @@ class Model
       }
       $query = "INSERT INTO ".$this->tableName."(".implode(',',array_keys($data)).") VALUES (\"".implode('","',array_values($data))."\")";
       $this->connection->query($query);
-      return true;
+
+      $id=-1;
+      foreach ($this->connection->query("SELECT LAST_INSERT_ID();")as $result) {
+        $id =  $result;
+      }
+      return $id ;
     }
 
     public function selectWhere($key, $value)
     {
       $this->checkForAlphaNumericAndDash($key);
       $query = "SELECT * FROM {$this->tableName} WHERE {$key} ='{$value}'";
+        $result = $this->getquery($this->connection->query($query,PDO::FETCH_ASSOC));
+        return $result;
+    }
+
+    public function selectAll(){
+        $query = "SELECT * FROM {$this->tableName}";
         $result = $this->getquery($this->connection->query($query,PDO::FETCH_ASSOC));
         return $result;
     }
