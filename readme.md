@@ -2,9 +2,9 @@
 
 A barebones MVC framework for blogging. Mainly based on laravel.
 
-##Setup
+## Setup
 
-###Database
+### Database
 
 First you will need to hook the app up to a database. How do you do this?
 
@@ -22,13 +22,13 @@ If you are going to use any auth, you'll need a table called "users" with the co
 
 If you are going to hold some blog posts, you'll need a table called "posts" with the columns id, title, body, and slug. 
 
-###hosting
+### hosting
 
 Host it up by pointing your apache/nginex to the "Public" folder. 
 
 And that's the setup! Now you can start creating: 
 
-##Routes
+## Routes
 
 Define your routes in the "Public/Index.php" file by calling methods on the $router instance of the Router class. 
 
@@ -58,7 +58,7 @@ $router->get("/dog/{$dogtype}",function($doggy){
     return "your type of dog is: " . $doggy;
 };
 
-##Views
+## Views
 
 Views can also be created with the View class:
 
@@ -72,7 +72,7 @@ The make() method creates a string which you can concatenate together as you lik
 
 When you create your view files, use static HTML or write them the way PHP was originally written to be used: As a templating language. Anything you echo will be returned as a string to wherever you are calling the "make" method.
 
-##Authentication
+## Authentication
 
 There's no register button. The login is designed for people who know the admin :) . These people can ask their admin to type the following into their command line: 
 
@@ -86,7 +86,7 @@ $auth->check()
 
 will return true.
 
-##Models
+## Models
 
 Create a new model with the table name as a string for the constructor:
 
