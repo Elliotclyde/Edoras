@@ -23,16 +23,13 @@ $router->get('/backend/posts', function () use ($auth) {
         $posts = (new Model('posts'))->selectAll();
         $postList = '';
         foreach ($posts as $post) {
-            $postList .= '<div class="post">
-                          <h2><a href="/backend/posts/edit/'.$post->id.'">' . $post->title . '</a></h2>
-                          <div class="content">' . $post->body . '</div>
-                          </div>';
+            $postList .= (new View('backendpostitem', (array)$post))->make();
         }
         return (new View('backendpostlist', ['postList' => $postList]))->make();
     }
 });
 
-$router->get('/backend/posts/edit/{postid}', function ($postId) use ($auth) {
+$router->get('/backend/posts/{postid}/edit', function ($postId) use ($auth) {
   if (!$auth->check()) {
       header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
   } else {
@@ -47,7 +44,7 @@ $router->get('/backend/posts/edit/{postid}', function ($postId) use ($auth) {
   }
 });
 
-$router->post('/backend/posts/edit/{postid}', function ($postId) use ($auth, $requestVariables) {
+$router->post('/backend/posts/{postid}/edit', function ($postId) use ($auth, $requestVariables) {
   $posts = new Model('posts');
   if (!$auth->check() || !$posts->selectWhere('id',$postId) ) {
       header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
@@ -56,7 +53,7 @@ $router->post('/backend/posts/edit/{postid}', function ($postId) use ($auth, $re
     foreach ($requestVariables as $key => $value){
       $posts->updateWhere([$key => $value],['id'=> $postId]);
     }
-    header("Location: {$_SERVER["HTTP_ORIGIN"]}/backend/posts/edit/{$postId}");
+    header("Location: {$_SERVER["HTTP_ORIGIN"]}/backend/posts/");
   }
 });
 
@@ -76,11 +73,33 @@ $router->post('/backend/posts/new', function () use ($auth, $requestVariables) {
   } else {
     $posts = new Model('posts');
     $id = $posts->new($requestVariables)[0];
-    header("Location: {$_SERVER["HTTP_ORIGIN"]}/backend/posts/edit/{$id}");
+    header("Location: {$_SERVER["HTTP_ORIGIN"]}/backend/posts/");
+  }
+});
+
+$router->delete('/backend/posts/{id}', function ($id) use ($auth) {
+  if (!$auth->check()) {
+      header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
+  } else {
+    $posts = new Model('posts');
+    $posts->deleteWhere('id',$id);
+    header("Location: {$_SERVER["HTTP_ORIGIN"]}/backend/posts/");
   }
 });
 
 
+$router->get('/posts', function (){
+
+      $posts = (new Model('posts'))->selectAll();
+      $postList = '';
+      foreach ($posts as $post) {
+          $postList .= '<div class="post">
+                        <h2><a href="/posts/'.$post->slug.'">' . $post->title . '</a></h2>
+                        <div class="content">' . $post->body . '</div>
+                        </div>';
+      }
+      return (new View('backendpostlist', ['postList' => $postList]))->make();
+});
 
 $router->post('/data', function ($request) {
     return json_encode($request);

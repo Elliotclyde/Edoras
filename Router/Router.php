@@ -8,7 +8,7 @@ class Router
     private $request;
     private $called = false;
 
-    private $supportedHttpMethods = array("GET", "POST");
+    private $supportedHttpMethods = array("GET", "POST","DELETE");
 
     public function __construct(IRequest $request)
     {

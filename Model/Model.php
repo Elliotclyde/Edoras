@@ -4,6 +4,7 @@ class Model
 {
     protected $tableName;
     protected $connection;
+    protected $tableKeys;
 
     public function __construct($tableName)
     {
@@ -16,60 +17,69 @@ class Model
             throw new Exception("Could not connect to database");
             echo "Connection failed: " . $e->getMessage();
         }
-
+        $this->bootstrapTableKeys();
     }
 
-    public function new($data){
-      foreach(array_keys($data) as $key){
-        $this->checkForAlphaNumericAndDash($key);
-      }
-      $query = "INSERT INTO ".$this->tableName."(".implode(',',array_keys($data)).") VALUES (\"".implode('","',array_values($data))."\")";
-      $this->connection->query($query);
+    private function bootstrapTableKeys()
+    {
 
-      $id=-1;
-      foreach ($this->connection->query("SELECT LAST_INSERT_ID();")as $result) {
-        $id =  $result;
-      }
-      return $id ;
+        $query = "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_NAME = '" . $this->tableName . "';";
+        $keys = [];
+        foreach ($this->connection->query($query, PDO::FETCH_ASSOC) as $result) {
+            array_push($keys, $result["COLUMN_NAME"]);
+        }
+        $this->tableKeys = $keys;
+    }
+
+    function new ($data) {
+        foreach (array_keys($data) as $key) {
+            $this->checkKeys($key);
+        }
+        $query = "INSERT INTO " . $this->tableName . "(" . implode(',', array_keys($data)) . ") VALUES (\"" . implode('","', array_values($data)) . "\")";
+        $this->connection->query($query);
+        $id = -1;
+        foreach ($this->connection->query("SELECT LAST_INSERT_ID();") as $result) {
+            $id = $result;
+        }
+        return $id;
     }
 
     public function selectWhere($key, $value)
     {
-      $this->checkForAlphaNumericAndDash($key);
-      $query = "SELECT * FROM {$this->tableName} WHERE {$key} ='{$value}'";
-        $result = $this->getquery($this->connection->query($query,PDO::FETCH_ASSOC));
+        $this->checkKeys($key);
+        $query = "SELECT * FROM {$this->tableName} WHERE {$key} ='{$value}'";
+        $result = $this->getquery($this->connection->query($query, PDO::FETCH_ASSOC));
         return $result;
     }
-
-    public function selectAll(){
+    public function deleteWhere($key, $value)
+    {
+        $this->checkKeys($key);
+        $query = "DELETE FROM {$this->tableName} WHERE {$key} ='{$value}';";
+        $this->getquery($this->connection->query($query));
+        return true;
+    }
+    public function selectAll()
+    {
         $query = "SELECT * FROM {$this->tableName}";
-        $result = $this->getquery($this->connection->query($query,PDO::FETCH_ASSOC));
+        $result = $this->getquery($this->connection->query($query, PDO::FETCH_ASSOC));
         return $result;
     }
 
     public function updateWhere($update, $condition)
     {
+        
         $updateKey = array_keys($update)[0];
         $updateValue = $update[$updateKey];
         $conditionKey = array_keys($condition)[0];
         $conditionValue = $condition[$conditionKey];
-        
-        $this->checkForAlphaNumericAndDash($updateKey);
-        $this->checkForAlphaNumericAndDash($conditionKey);
 
-        $query = "UPDATE ".$this->tableName." SET ".$updateKey."='".$updateValue."' WHERE ".$conditionKey."=".$conditionValue."";
+        $this->checkKeys($updateKey);
+        $this->checkKeys($conditionKey);
+
+        $query = "UPDATE " . $this->tableName . " SET " . $updateKey . "='" . $updateValue . "' WHERE " . $conditionKey . "=" . $conditionValue . "";
         $this->connection->query($query);
 
         return $this->selectWhere($conditionKey, $conditionValue);
-    }
-
-    public function getKeys(){
-        $query = "SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_NAME`='{$this->tableName}';";
-        $result = [];
-        foreach ($this->connection->query($query,PDO::FETCH_ASSOC) as $row){
-            array_push($result,$row['COLUMN_NAME']);
-        }
-        return $result;
     }
 
     protected function getQuery($queriedData)
@@ -84,9 +94,18 @@ class Model
         }
         return $result;
     }
+    protected function checkKeys($key)
+    {
+        if(!in_array($key,$this->tableKeys)){
+            throw new Exception("  Keys do not exist in table  ");
+        }
+
+    }
     protected function checkForAlphaNumericAndDash($input)
     {
         $regexp = "/^[a-zA-Z0-9-_]+$/";
-        if (preg_match($regexp, $input)==0) {throw new Exception("  You can only use alphanumeric characters  dashes and underscores in this input  ");}
+        if (preg_match($regexp, $input) == 0) {
+            throw new Exception("  You can only use alphanumeric characters  dashes and underscores in this input  ");
+        }
     }
 }
