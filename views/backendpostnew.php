@@ -1,6 +1,7 @@
 <head>
     <title>Posts</title>
     <link rel="stylesheet" href="/styles.css">
+    <script src="https://cdn.ckeditor.com/4.14.1/standard/ckeditor.js"></script>
 </head>
 <body>
     
@@ -13,5 +14,7 @@
 </form>
 
 <a href="/backend/posts">Back</a>
-
+<script>
+CKEDITOR.replace( 'body' );
+</script>
 </body>

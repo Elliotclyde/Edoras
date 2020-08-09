@@ -50,6 +50,7 @@ class Model
     public function selectWhere($key, $value)
     {
         $this->checkKeys($key);
+        $value = str_replace("'","\\'",$value);
         $query = "SELECT * FROM {$this->tableName} WHERE {$key} ='{$value}'";
         $result = $this->getquery($this->connection->query($query, PDO::FETCH_ASSOC));
         return $result;

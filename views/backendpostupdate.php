@@ -1,6 +1,7 @@
 <head>
     <title>Posts</title>
     <link rel="stylesheet" href="/styles.css">
+    <script src="https://cdn.ckeditor.com/4.14.1/standard/ckeditor.js"></script>
 </head>
 <body>
 <h1>Edit post</h1>
@@ -16,6 +17,8 @@
 <button id="delete-button">Delete</button>
 
 <script>
+
+CKEDITOR.replace('body');
 
 document.getElementById("delete-button").addEventListener("click",onDeleteButtonClick);
 
