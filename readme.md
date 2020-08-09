@@ -1,18 +1,34 @@
+#Minivel
+
 A barebones MVC framework for blogging. Mainly based on laravel.
 
-How to hook it up to a database?
+##Setup
 
-Create a .env file in the folder
+###Database
+
+First you will need to hook the app up to a database. How do you do this?
+
+Create a .env file in the root of the project folder, and fill it with the following:
 
 HOSTNAME=123.0.0.1
 DBNAME=mydatabasename
 DBUSERNAME=mydatabaseusername
 DBPASSWORD=mydatabasepassword
-DBPORT=3mydatabaseport
+DBPORT=mydatabaseport
 
-Host by pointing your apache/nginex to the "Public" folder 
+Then you will need to do your own migrations and seeds to create any database tables you need. 
 
-ROUTES
+If you are going to use any auth, you'll need a table called "users" with the columns id, username and password.
+
+If you are going to hold some blog posts, you'll need a table called "posts" with the columns id, title, body, and slug. 
+
+###hosting
+
+Host it up by pointing your apache/nginex to the "Public" folder. 
+
+And that's the setup! Now you can start creating: 
+
+##Routes
 
 Define your routes in the "Public/Index.php" file by calling methods on the $router instance of the Router class. 
 
@@ -22,11 +38,11 @@ $router->get("/dog",function(){
     return "woof;
 };
 
-Or use "view" to return an HTML file from the Views Folder on a get request: 
+Or call the "view" method to return an HTML file from the Views Folder on a get request: 
 
 $router->view("/dog","dog");
 
-This will work with a PHP file too (you don't need to note the filetype in the parameter). And you can pass variables with an associative array as the third parameter:
+This will work with a PHP file too (you don't need to note the filetype in the parameter). And you can pass variables with an associative array as the third parameter on the view method:
 
 $router->view("/dog","dog",["chihuahua"=>"small" , "greatdane"=>"big"]);
 
@@ -42,7 +58,7 @@ $router->get("/dog/{$dogtype}",function($doggy){
     return "your type of dog is: " . $doggy;
 };
 
-VIEWS
+##Views
 
 Views can also be created with the View class:
 
@@ -54,7 +70,9 @@ $router->get("/dog/{$dogtype}",function(){
 
 The make() method creates a string which you can concatenate together as you like.
 
-AUTHENTICATION
+When you create your view files, use static HTML or write them the way PHP was originally written to be used: As a templating language. Anything you echo will be returned as a string to wherever you are calling the "make" method.
+
+##Authentication
 
 There's no register button. The login is designed for people who know the admin :) . These people can ask their admin to type the following into their command line: 
 
@@ -68,7 +86,7 @@ $auth->check()
 
 will return true.
 
-MODELS
+##Models
 
 Create a new model with the table name as a string for the constructor:
 
@@ -85,4 +103,4 @@ delete all where a key matches a value:                             posts->delet
 
 If the key does not match a DB key an error will be thrown. 
 
-All singlequotes are escaped
+All singlequotes are escaped.
