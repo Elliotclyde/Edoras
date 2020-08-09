@@ -7,5 +7,6 @@
 <h1>Welcome to my blog</h1>
 <?= $postList ?>
 
-<a href="/backend/posts/new">New Post</a>
+
+<a href="/">back</a>
 </body>
