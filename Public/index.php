@@ -93,10 +93,7 @@ $router->get('/posts', function (){
       $posts = (new Model('posts'))->selectAll();
       $postList = '';
       foreach ($posts as $post) {
-          $postList .= '<div class="post">
-                        <h2><a href="/posts/'.$post->slug.'">' . $post->title . '</a></h2>
-                        <div class="content">' . $post->body . '</div>
-                        </div>';
+          $postList .= (new View('postitem', (array)$post))->make();
       }
       return (new View('backendpostlist', ['postList' => $postList]))->make();
 });

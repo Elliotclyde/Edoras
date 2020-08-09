@@ -12,6 +12,6 @@
 <input type="submit">
 </form>
 
-<a href="/backend/posts/new"></a>
+<a href="/backend/posts">Back</a>
 
 </body>

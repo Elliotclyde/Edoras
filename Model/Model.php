@@ -35,6 +35,9 @@ class Model
         foreach (array_keys($data) as $key) {
             $this->checkKeys($key);
         }
+        foreach ($data as $key => $value) {
+            $data[$key] = $this->connection->quote($value);
+        }
         $query = "INSERT INTO " . $this->tableName . "(" . implode(',', array_keys($data)) . ") VALUES (\"" . implode('","', array_values($data)) . "\")";
         $this->connection->query($query);
         $id = -1;
@@ -67,7 +70,7 @@ class Model
 
     public function updateWhere($update, $condition)
     {
-        
+
         $updateKey = array_keys($update)[0];
         $updateValue = $update[$updateKey];
         $conditionKey = array_keys($condition)[0];
@@ -75,7 +78,8 @@ class Model
 
         $this->checkKeys($updateKey);
         $this->checkKeys($conditionKey);
-
+        $updateValue = str_replace("'","\\'",$updateValue);
+       
         $query = "UPDATE " . $this->tableName . " SET " . $updateKey . "='" . $updateValue . "' WHERE " . $conditionKey . "=" . $conditionValue . "";
         $this->connection->query($query);
 
@@ -96,7 +100,7 @@ class Model
     }
     protected function checkKeys($key)
     {
-        if(!in_array($key,$this->tableKeys)){
+        if (!in_array($key, $this->tableKeys)) {
             throw new Exception("  Keys do not exist in table  ");
         }
 
