@@ -35,7 +35,7 @@ Define your routes in the "Public/Index.php" file by calling methods on the $rou
 Use the http method as the method called, a string of the route as your first argument, then a closure which returns a string eg : 
 
 $router->get("/dog",function(){
-    return "woof;
+    return "woof";
 };
 
 Or call the "view" method to return an HTML file from the Views Folder on a get request: 
@@ -46,7 +46,7 @@ This will work with a PHP file too (you don't need to note the filetype in the p
 
 $router->view("/dog","dog",["chihuahua"=>"small" , "greatdane"=>"big"]);
 
-And you can also grab one parameter from the route (only one for now sorry - I'm not Taylor Otwell!)
+And you can also grab one parameter from the route (only one for now). You do this by throwing some curly braces around a sectionof the URL: 
 
 $router->get("/dog/{$dogtype}",function($dogtype){
     return "your type of dog is: " . $dogtype;
@@ -63,12 +63,19 @@ $router->get("/dog/{$dogtype}",function($doggy){
 Views can also be created with the View class:
 
 $router->get("/dog/{$dogtype}",function(){
-
     $dogView = new View('dog', ['dogtype' => $dogtype])
     return $dogView->make();
 };
 
-The make() method creates a string which you can concatenate together as you like.
+The Views constructor arguments are: 1. The filename in the Views folder (without the extension), and 2. An associative array of variables to pass to it if you're creating a PHP view.
+
+The make() method creates a string which you can compose together as you like:
+
+$router->get("/dog/{$dogtype}",function(){
+    $body = (new View('dog', ['dogtype' => $dogtype]))->make();
+    $layout = new View('layout,['body' => $body]);
+    return $dogView->make();
+};
 
 When you create your view files, use static HTML or write them the way PHP was originally written to be used: As a templating language. Anything you echo will be returned as a string to wherever you are calling the "make" method.
 
