@@ -5,6 +5,8 @@ include_once __DIR__ . '/../Bootstrap.php';
 $router->view('/', "home");
 $router->view('/backend', 'backend');
 
+$router->get('/cont',"PostController@show");
+
 $router->post('/backend', function () use ($requestVariables, $auth) {
 
     if ($auth->login($requestVariables['username'], $requestVariables['password'])) {

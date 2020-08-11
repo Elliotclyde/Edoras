@@ -11,11 +11,11 @@ foreach ($envKeyValPairs as $element){
 
 require __DIR__ . '/vendor/autoload.php';
 
-include_once 'Router/Request.php';
-include_once 'Router/Router.php';
-include_once 'View/View.php';
-include_once 'Model/Model.php';
-include_once 'Auth/Auth.php';
+include_once 'Bootstrap/Router/Request.php';
+include_once 'Bootstrap/Router/Router.php';
+include_once 'Bootstrap/View/View.php';
+include_once 'Bootstrap/Model/Model.php';
+include_once 'Bootstrap/Auth/Auth.php';
 
 //set up main services
 

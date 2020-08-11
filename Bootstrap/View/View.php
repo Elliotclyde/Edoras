@@ -10,7 +10,7 @@ class View
 
     public function __construct($viewName, $variables = [])
     {
-        $this->viewsDir= __DIR__ . "/../Views/";
+        $this->viewsDir= __DIR__ . "/../../Views/";
         $this->viewName = $viewName;
         $this->variables = $variables;
         $this->filePath = $this->getFilePath();

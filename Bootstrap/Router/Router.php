@@ -1,6 +1,7 @@
 <?php
 
 include_once "ParameterRoute.php";
+include_once "ControllerRoute.php";
 include_once __DIR__ . "/../View/View.php";
 
 class Router
@@ -24,6 +25,10 @@ class Router
         }
         if (!in_array(strtoupper($name), $this->supportedHttpMethods)) {
             $this->invalidMethodHandler();
+        }
+        if(count($arguments)> 1 && is_string($arguments[1]) && substr_count($arguments[1],"@")==1){
+            echo "Creating Controller Route";
+            $this->createControllerRoute($name, $arguments);
         }
         if (preg_match('/{[a-zA-Z0-9]+}/', $arguments[0])) {
             $this->createParameterRoute($name, $arguments);
@@ -60,7 +65,8 @@ class Router
             $this->parameterRoutes->{strtolower($name)} = [];
         }
     }
-    //view route - always under get
+
+    //view route - always uses get http method
 
     private function createViewRoute($arguments)
     {
@@ -70,6 +76,26 @@ class Router
         function () use ($viewName, $viewArguments) {
             return (new View($viewName, $viewArguments))->make();
         };
+    }
+
+    //Controller route
+
+    private function createControllerRoute($name, $arguments)
+    {
+        $controllerRoute = new ControllerRoute($name, $arguments);
+        $this->generateControllerRouteProperty($name);
+
+        array_push($this->controllerRoutes->{strtolower($name)}, $controllerRoute);
+    }
+
+    private function generateControllerRouteProperty($name)
+    {
+        if (!property_exists($this, 'controllerRoutes')) {
+            $this->controllerRoutes = new stdClass();
+        }
+        if (!property_exists($this->controllerRoutes, strtolower($name))) {
+            $this->controllerRoutes->{strtolower($name)} = [];
+        }
     }
 
     private function formatRoute($route)
