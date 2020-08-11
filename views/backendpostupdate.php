@@ -37,7 +37,9 @@ function onDeleteconfirm(){
         if (this.status == 200 && this.readyState == 4) {
             redirectToPosts();
         }
-        else{throw new Exception("error occured");}
+        else{
+            throw "error occured";
+        } 
     }
     xhr.send();
 }

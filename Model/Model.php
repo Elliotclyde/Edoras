@@ -31,15 +31,14 @@ class Model
         $this->tableKeys = $keys;
     }
 
-    function new ($data) {
+    //Create new row in DB
+    public function new ($data) {
         foreach (array_keys($data) as $key) {
-            $this->checkKeys($key);
+            $this->checkKey($key);
         }
-        foreach ($data as $key => $value) {
-            $data[$key] = $this->connection->quote($value);
-        }
-        $query = "INSERT INTO " . $this->tableName . "(" . implode(',', array_keys($data)) . ") VALUES (\"" . implode('","', array_values($data)) . "\")";
-        $this->connection->query($query);
+        $questionMarkList = $this->getQuestionMarksForParamList($data);
+        $query  = $this->connection->prepare("INSERT INTO " . $this->tableName . "(" . implode(',', array_keys($data)) . ") VALUES (" . $questionMarkList . ");");
+        $query->execute(array_values($data));
         $id = -1;
         foreach ($this->connection->query("SELECT LAST_INSERT_ID();") as $result) {
             $id = $result;
@@ -47,59 +46,72 @@ class Model
         return $id;
     }
 
+    private function getQuestionMarksForParamList($data)
+    {
+        $questionMarkList='';
+        foreach ( array_slice($data, 0,count($data) - 1) as $key=>$value) {
+            $questionMarkList .= "? , ";
+        }
+        $questionMarkList .= "?";
+        return $questionMarkList;
+    }
+
+    //get's an array of STD classes representing columns where the key matches the value
     public function selectWhere($key, $value)
     {
-        $this->checkKeys($key);
+        $this->checkKey($key);
         $value = str_replace("'","\\'",$value);
-        $query = "SELECT * FROM {$this->tableName} WHERE {$key} ='{$value}'";
-        $result = $this->getquery($this->connection->query($query, PDO::FETCH_ASSOC));
-        return $result;
+        $query = $this->connection->prepare("SELECT * FROM {$this->tableName} WHERE {$key} = :value");
+        $query->execute([':value' => $value]);
+        return $query->fetchAll(PDO::FETCH_OBJ);
     }
-    public function deleteWhere($key, $value)
+
+    //delete by id
+    public function deleteById($id)
     {
-        $this->checkKeys($key);
-        $query = "DELETE FROM {$this->tableName} WHERE {$key} ='{$value}';";
-        $this->getquery($this->connection->query($query));
+        $query = $this->connection->prepare("DELETE FROM {$this->tableName} WHERE id = :id");
+        var_dump($query);
+        $query->bindParam(':id', $id, PDO::PARAM_INT);
+        $query->execute();
         return true;
     }
+
+    //deletes all rows where the key matches the value
+    public function deleteWhere($key, $value)
+    {
+        $this->checkKey($key);
+        $query = $this->connection->prepare("DELETE FROM {$this->tableName} WHERE {$key} = :value");
+        $query->bindParam(':value', $value);
+        $query->execute();
+        return true;
+    }
+
+    //Select all rows
     public function selectAll()
     {
-        $query = "SELECT * FROM {$this->tableName}";
-        $result = $this->getquery($this->connection->query($query, PDO::FETCH_ASSOC));
-        return $result;
+        $query = $this->connection->prepare("SELECT * FROM {$this->tableName}");
+        $query->execute();
+        return $query->fetchAll(PDO::FETCH_OBJ);
     }
-
-    public function updateWhere($update, $condition)
+    
+    //Update the first key value array where the second key value array exists
+    public function updateWhere($updatePair, $conditionPair)
     {
+        $updateKey = array_keys($updatePair)[0];
+        $updateValue = $updatePair[$updateKey];
+        $conditionKey = array_keys($conditionPair)[0];
+        $conditionValue = $conditionPair[$conditionKey];
 
-        $updateKey = array_keys($update)[0];
-        $updateValue = $update[$updateKey];
-        $conditionKey = array_keys($condition)[0];
-        $conditionValue = $condition[$conditionKey];
-
-        $this->checkKeys($updateKey);
-        $this->checkKeys($conditionKey);
+        $this->checkKey($updateKey);
+        $this->checkKey($conditionKey);
         $updateValue = str_replace("'","\\'",$updateValue);
-       
-        $query = "UPDATE " . $this->tableName . " SET " . $updateKey . "='" . $updateValue . "' WHERE " . $conditionKey . "=" . $conditionValue . "";
-        $this->connection->query($query);
 
-        return $this->selectWhere($conditionKey, $conditionValue);
+        $query = $this->connection->prepare("UPDATE ".$this->tableName." SET ".$updateKey." =:updateValue  WHERE ".$conditionKey."=:conditionValue");
+        $query->execute([':updateValue'=> $updateValue, ':conditionValue'=> $conditionValue]);
+        return true;
     }
 
-    protected function getQuery($queriedData)
-    {
-        $result = [];
-        foreach ($queriedData as $row) {
-            $object = new stdClass();
-            foreach (array_keys($row) as $key) {
-                $object->{$key} = $row[$key];
-            }
-            array_push($result, $object);
-        }
-        return $result;
-    }
-    protected function checkKeys($key)
+    protected function checkKey($key)
     {
         if (!in_array($key, $this->tableKeys)) {
             throw new Exception("  Keys do not exist in table  ");

@@ -82,8 +82,7 @@ $router->delete('/backend/posts/{id}', function ($id) use ($auth) {
       header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
   } else {
     $posts = new Model('posts');
-    $posts->deleteWhere('id',$id);
-    header("Location: {$_SERVER["HTTP_ORIGIN"]}/backend/posts/");
+    $posts->deleteById($id);
   }
 });
 
