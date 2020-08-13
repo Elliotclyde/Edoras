@@ -1,7 +1,7 @@
 <?php
 
 include_once "ParameterRoute.php";
-include_once "ControllerRoute.php";
+include_once __DIR__ . "/../Controller/Controller.php";
 include_once __DIR__ . "/../View/View.php";
 
 class Router
@@ -26,22 +26,26 @@ class Router
         if (!in_array(strtoupper($name), $this->supportedHttpMethods)) {
             $this->invalidMethodHandler();
         }
-        if(count($arguments)> 1 && is_string($arguments[1]) && substr_count($arguments[1],"@")==1){
-            echo "Creating Controller Route";
-            $this->createControllerRoute($name, $arguments);
-        }
         if (preg_match('/{[a-zA-Z0-9]+}/', $arguments[0])) {
             $this->createParameterRoute($name, $arguments);
         }
-        $this->createClosureRoute($name, $arguments);
+        $this->createNormalRoute($name, $arguments);
 
     }
 
     //closure route
 
-    private function createClosureRoute($name, $arguments)
+    private function createNormalRoute($name, $arguments)
     {
-        list($route, $method) = $arguments;
+        $route= $arguments[0];
+        $method= function(){};
+        if(is_string($arguments[1]) && substr_count($arguments[1],"@")==1){
+            $method=(new Controller($arguments[1]))->getMethod();
+        }
+        else{
+            $method=$arguments[1];
+        }
+        
         $this->{strtolower($name)}[$this->formatRoute($route)] = $method;
     }
 
@@ -78,26 +82,6 @@ class Router
         };
     }
 
-    //Controller route
-
-    private function createControllerRoute($name, $arguments)
-    {
-        $controllerRoute = new ControllerRoute($name, $arguments);
-        $this->generateControllerRouteProperty($name);
-
-        array_push($this->controllerRoutes->{strtolower($name)}, $controllerRoute);
-    }
-
-    private function generateControllerRouteProperty($name)
-    {
-        if (!property_exists($this, 'controllerRoutes')) {
-            $this->controllerRoutes = new stdClass();
-        }
-        if (!property_exists($this->controllerRoutes, strtolower($name))) {
-            $this->controllerRoutes->{strtolower($name)} = [];
-        }
-    }
-
     private function formatRoute($route)
     {
         $result = rtrim($route, '/');
@@ -132,7 +116,6 @@ class Router
             return false;
         }
     }
-
     public function resolve()
     {
         // method dictionary - keys are the urls, values are method to call
@@ -142,21 +125,22 @@ class Router
         $formatedRoute = $this->formatRoute($this->request->requestUri);
         $parameters = [];
         
-        //refactor this section
-
+        //If not in regular routes
         if (!in_array($formatedRoute, array_keys($methodDictionary))) {
+            //check for parameter route
             $parameterRoute = $this->getParameterRoute($httpMethod, $formatedRoute);
             if ($parameterRoute) {
                 $method = $parameterRoute->method;
                 $parameters = $parameterRoute->getParameter($formatedRoute);
-            } else {
-                $this->defaultRequestHandler();
-                return;
             }
+            else{
+            $this->defaultRequestHandler();
+            return;}
+            
         } else {
             $method = $methodDictionary[$formatedRoute];
         }
-        
+
         echo call_user_func_array($method, $parameters);
     }
 

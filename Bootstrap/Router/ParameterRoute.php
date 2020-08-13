@@ -1,4 +1,5 @@
 <?php
+include_once __DIR__ . "/../Controller/Controller.php";
 
 class ParameterRoute
 {
@@ -6,7 +7,16 @@ class ParameterRoute
     {
         $this->name=$name;
         $this->route =$arguments[0];
-        $this->method =$arguments[1];
+
+        $this->method= function(){};
+
+        if(is_string($arguments[1]) && substr_count($arguments[1],"@")==1){
+            $this->method=(new Controller($arguments[1]))->getMethod();
+        }
+        else{
+            $this->method=$arguments[1];
+        }
+
         $this->parameterName = $this->getParameterName($this->route);
     }
     private function getParameterName($route)
