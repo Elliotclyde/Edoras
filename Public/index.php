@@ -8,7 +8,6 @@ $router->view('/backend', 'backend');
 $router->get('/cont/{dawg}',"PostController@show");
 
 $router->post('/backend', function () use ($requestVariables, $auth) {
-
     if ($auth->login($requestVariables['username'], $requestVariables['password'])) {
         header("Location: {$_SERVER["HTTP_ORIGIN"]}/backend/posts/");
     } else {return <<<HTML
@@ -18,7 +17,6 @@ $router->post('/backend', function () use ($requestVariables, $auth) {
 });
 
 $router->get('/backend/posts',"PostController@backendIndex");
-
 $router->get('/backend/posts/{postid}/edit',"PostController@edit");
 $router->post('/backend/posts/{postid}/edit',"PostController@update");
 $router->get('/backend/posts/new',"PostController@create");

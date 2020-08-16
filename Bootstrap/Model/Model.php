@@ -66,6 +66,14 @@ class Model
         return $query->fetchAll(PDO::FETCH_OBJ);
     }
 
+    //select by id 
+    public function find($id)
+    {
+        $query = $this->connection->prepare("SELECT * FROM {$this->tableName} WHERE id = :id");
+        $query->execute([':id' => $id]);
+        return $query->fetchAll(PDO::FETCH_OBJ);
+    }
+
     //delete by id
     public function deleteById($id)
     {
