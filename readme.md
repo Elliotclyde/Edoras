@@ -58,9 +58,9 @@ Will respond to a "GET" requst with the URL "yourapp/dog" with a body of "woof".
 
 And you can also grab one parameter from the route. You do this by throwing some curly braces around a sectionof the URL:
 
-`$router->get("/dog/{$dogtype}",function($dogtype){   
-    return "your type of dog is: " . $dogtype;   
-};`  
+    $router->get("/dog/{$dogtype}",function($dogtype){   
+        return "your type of dog is: " . $dogtype;   
+    };  
 
 The name in the route does not need to match the parameter of the closure: 
 
@@ -107,18 +107,18 @@ The constructor of the View class has the following arguments:
 
 ### View Instantiation Example
 
-`$router->get("/dog/{$dogtype}",function($dogtype){   
-    $dogView = new View('dog', ['dogtype' => $dogtype])   
-    return $dogView->make();   
-};`   
+    $router->get("/dog/{$dogtype}",function($dogtype){   
+        $dogView = new View('dog', ['dogtype' => $dogtype])   
+        return $dogView->make();   
+    };  
 
 The make() method creates a string which you can compose together as you like:
 
-$router->get("/dog/{$dogtype}",function($dogtype){   
-    $body = (new View('dog', ['dogtype' => $dogtype]))->make();   
-    $layout = new View('layout,['body' => $body]);   
-    return $dogView->make();   
-};  
+    $router->get("/dog/{$dogtype}",function($dogtype){   
+        $body = (new View('dog', ['dogtype' => $dogtype]))->make();   
+        $layout = new View('layout,['body' => $body]);   
+        return $dogView->make();   
+    };  
 
 ## Controllers
 
@@ -134,13 +134,13 @@ Define public methods on the controller class. These will later be used to repla
 
 ### Controller Definition Example
 
-`//Controllers/DogController.php  
-class DogController{
-    public method index($dogtype){
-        new View('dog', ['dogtype' => $dogtype]));
-        return "Woof";
-    }
-}`    
+    //Controllers/DogController.php  
+    class DogController{
+        public method index($dogtype){
+            new View('dog', ['dogtype' => $dogtype]));
+            return "Woof";
+        }
+    }    
 
 ### Controller Routes
 
@@ -172,14 +172,14 @@ When a user tries to log, call the "login" method:
 
 ### Log In Example
 
-`$router->post('/backend', function () {
-    if (new (Auth($_SESSION ))->login($_REQUEST\["username"\], $_REQUEST\["password"\]))) {  
-        header("Location: {$_SERVER\["HTTP_ORIGIN"\]}/backend/posts/");  
-    } else {return <<<\HTML  
-    <\h1>Sorry, you aren't logged in.<\/h1>  
-  HTML;  
-    }  
-});`      
+    $router->post('/backend', function () {
+        if (new (Auth($_SESSION ))->login($_REQUEST\["username"\], $_REQUEST\["password"\]))) {  
+            header("Location: {$_SERVER\["HTTP_ORIGIN"\]}/backend/posts/");  
+        } else {return <<<\HTML  
+        <\h1>Sorry, you aren't logged in.<\/h1>  
+      HTML;  
+        }  
+    });     
 
 ### Authentication checks
 
