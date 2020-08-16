@@ -173,10 +173,10 @@ When a user tries to log, call the "login" method:
 ### Log In Example
 
     $router->post('/backend', function () {
-        if (new (Auth($_SESSION ))->login($_REQUEST\["username"\], $_REQUEST\["password"\]))) {  
-            header("Location: {$_SERVER\["HTTP_ORIGIN"\]}/backend/posts/");  
-        } else {return <<<\HTML  
-        <\h1>Sorry, you aren't logged in.<\/h1>  
+        if (new (Auth($_SESSION ))->login($_REQUEST["username"], $_REQUEST["password"]))) {  
+            header("Location: {$_SERVER["HTTP_ORIGIN"]}/backend/");  
+        } else {return <<<HTML  
+        <h1>Sorry, you aren't logged in.</h1>  
       HTML;  
         }  
     });     
