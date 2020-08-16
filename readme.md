@@ -48,9 +48,9 @@ Calling a method on the $router instance will tell your application to respond:
 
 ### Simple Route Example 
 
-$router->get("/dog",function(){   
+`$router->get("/dog",function(){   
     return "woof";   
-};  
+};`   
 
 Will respond to a "GET" requst with the URL "yourapp/dog" with a body of "woof".
 
@@ -58,15 +58,15 @@ Will respond to a "GET" requst with the URL "yourapp/dog" with a body of "woof".
 
 And you can also grab one parameter from the route. You do this by throwing some curly braces around a sectionof the URL:
 
-$router->get("/dog/{$dogtype}",function($dogtype){   
+`$router->get("/dog/{$dogtype}",function($dogtype){   
     return "your type of dog is: " . $dogtype;   
-};   
+};`  
 
 The name in the route does not need to match the parameter of the closure: 
 
-$router->get("/dog/{$dogtype}",function($doggy){   
+`$router->get("/dog/{$dogtype}",function($doggy){   
     return "your type of dog is: " . $doggy;
-};
+};`   
 
 ### View Routes 
 
@@ -107,10 +107,10 @@ The constructor of the View class has the following arguments:
 
 ### View Instantiation Example
 
-$router->get("/dog/{$dogtype}",function($dogtype){   
+`$router->get("/dog/{$dogtype}",function($dogtype){   
     $dogView = new View('dog', ['dogtype' => $dogtype])   
     return $dogView->make();   
-};
+};`   
 
 The make() method creates a string which you can compose together as you like:
 
@@ -134,13 +134,13 @@ Define public methods on the controller class. These will later be used to repla
 
 ### Controller Definition Example
 
-//Controllers/DogController.php  
+`//Controllers/DogController.php  
 class DogController{
     public method index($dogtype){
         new View('dog', ['dogtype' => $dogtype]));
         return "Woof";
     }
-}
+}`    
 
 ### Controller Routes
 
@@ -172,14 +172,14 @@ When a user tries to log, call the "login" method:
 
 ### Log In Example
 
-$router->post('/backend', function () {
+`$router->post('/backend', function () {
     if (new (Auth($_SESSION ))->login($_REQUEST\["username"\], $_REQUEST\["password"\]))) {  
         header("Location: {$_SERVER\["HTTP_ORIGIN"\]}/backend/posts/");  
     } else {return <<<\HTML  
     <\h1>Sorry, you aren't logged in.<\/h1>  
   HTML;  
     }  
-});  
+});`      
 
 ### Authentication checks
 
