@@ -126,7 +126,7 @@ Create controllers by creating PHP files in the "Controllers" folder. Controller
 
 - Don't need to extend any controller parent class
 - Need to have a classname matching their filename (excluding the extension)
-- Should (but don't need to) have
+- Should (but don't need to) have a name in PascalCase
 
 Controller classes , however, the name of the controller class needs to match the filename (before the extension). It is also a good idea to use pascalcase as a convention for the controller name.  
 
