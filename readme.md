@@ -128,9 +128,7 @@ Create controllers by creating PHP files in the "Controllers" folder. Controller
 - Need to have a classname matching their filename (excluding the extension)
 - Should (but don't need to) have a name in PascalCase
 
-Controller classes , however, the name of the controller class needs to match the filename (before the extension). It is also a good idea to use pascalcase as a convention for the controller name.  
-
-Define public methods on the controller class. These will later be used to replace closures in routing.
+The controller's public methods can later be used to replace closures in routing.
 
 ### Controller Definition Example
 
