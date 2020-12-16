@@ -234,3 +234,8 @@ posts->deleteWhere(postid,$id);
 If the key does not match a DB key an error will be thrown.   
 
 All singlequotes are escaped.
+
+## And that's it! 
+
+Thanks for having a look! 
+Check out some more of my work [in my website](http://elliotclyde.nz)
